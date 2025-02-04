@@ -38,8 +38,11 @@ def main():
         "Augmentation Techniques": augmentations,
     }
 
+    os.makedirs(SAVE_DIR, exist_ok=True)
+
     csv_filename = os.path.join(SAVE_DIR, "extracted_data.csv")
     write_to_csv(csv_filename, data_to_save)
+    print("Data Saved Successfully")
 
 if __name__ == "__main__":
     main()
