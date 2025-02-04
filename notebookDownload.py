@@ -8,7 +8,7 @@ import time
 load_dotenv()
 
 # Kaggle search parameters
-DATASET = "mateuszbuda/lgg-mri-segmentation"
+DATASET = os.getenv("DATASET_NAME")
 DOWNLOAD_PATH = os.getenv("download_path", "./kaggle_notebooks")
 SORT_ORDERS = ["hotness", "voteCount", "score"]  # Different sorting orders to maximize results
 PER_PAGE = 100  # Max allowed by Kaggle API
