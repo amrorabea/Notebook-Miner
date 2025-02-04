@@ -33,3 +33,12 @@ Set your environment variables in the `.env` file.
 ```bash
 $ python notebookDownload.py
 ```
+
+- this should create a new folder `notebooks` that will save all notebooks downloaded from Kaggle.
+
+## Run the notebooks analyzer
+
+```bash
+$ python analyzer.py
+```
+- this should create a new folder `data` that will contain a csv file `extracted_data.csv` containing all data analyzed from the notebooks.
