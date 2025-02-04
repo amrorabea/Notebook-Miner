@@ -107,7 +107,7 @@ def index():
         'aug_graph': aug_fig.to_html(full_html=False)
     }
 
-    return render_template("index.html", **graphs)
+    return render_template("/src/dashboard/index.html", **graphs)
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
