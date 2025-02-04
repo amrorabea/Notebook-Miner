@@ -5,12 +5,18 @@ import os
 
 app = Flask(__name__)
 
-# Load the csv data
 try:
-    # Adjust the path to be relative to the static folder
-    df = pd.read_csv(os.path.join('static', 'extracted_data.csv'))
-except FileNotFoundError:
-    print("Error: Could not find the CSV file.")
+    # Get the absolute path to the CSV file
+    csv_path = os.path.join(os.path.dirname(__file__), 'static', 'extracted_data.csv')
+    print(f"Attempting to load CSV from: {csv_path}")  # Debug print
+    df = pd.read_csv(csv_path)
+except FileNotFoundError as e:
+    print(f"Error: Could not find the CSV file at {csv_path}")
+    print(f"Current working directory: {os.getcwd()}")
+    print(f"Directory contents: {os.listdir('.')}")
+    df = pd.DataFrame()
+except Exception as e:
+    print(f"Unexpected error loading CSV: {str(e)}")
     df = pd.DataFrame()
     
 @app.route("/")

@@ -24,15 +24,19 @@ COPY requirements.txt .
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application
-COPY . .
+# Copy the application code
+COPY src/ /app/src/
 
-# Create a non-root user and switch to it
-RUN useradd -m myuser && chown -R myuser:myuser /app
+# Ensure the static directory exists and has proper permissions
+RUN mkdir -p /app/src/dashboard/static
+
+# Create a non-root user
+RUN useradd -m myuser
+RUN chown -R myuser:myuser /app
 USER myuser
 
 # Expose the port the app runs on
 EXPOSE 8000
 
 # Command to run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "src.dashboard.app:app", "--workers", "4", "--timeout", "120"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "src.dashboard.app:app", "--workers", "4", "--timeout", "120", "--log-level", "debug"]
