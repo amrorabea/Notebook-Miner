@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML/DL Analysis Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>TCGA Notebooks Dashboard</h1>
+
+    <div class="dashboard-grid">
+        <div class="chart extra-wide">
+            <h2>Most Used Libraries</h2>
+            {{ libraries_graph | safe }}
+        </div>
+
+        <div class="chart">
+            <h2>Deep Learning Models</h2>
+            {{ models_graph | safe }}
+        </div>
+
+        <div class="chart">
+            <h2>Data Cleaning Techniques</h2>
+            {{ cleaning_graph | safe }}
+        </div>
+
+        <div class="chart">
+            <h2>Neural Network Architectures</h2>
+            {{ arch_graph | safe }}
+        </div>
+
+        <div class="chart wide">
+            <h2>Evaluation Metrics</h2>
+            {{ metrics_graph | safe }}
+        </div>
+
+        <div class="chart">
+            <h2>Optimizers and Loss Functions</h2>
+            {{ opt_loss_graph | safe }}
+        </div>
+
+        <div class="chart">
+            <h2>Data Augmentation Techniques</h2>
+            {{ aug_graph | safe }}
+        </div>
+    </div>
+</body>
+</html>
