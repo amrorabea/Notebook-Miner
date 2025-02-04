@@ -10,6 +10,9 @@ load_dotenv()
 # Kaggle search parameters
 DATASET = "mateuszbuda/lgg-mri-segmentation"
 DOWNLOAD_PATH = os.getenv("download_path", "./kaggle_notebooks")
+SORT_ORDERS = ["hotness", "voteCount", "score"]  # Different sorting orders to maximize results
+PER_PAGE = 100  # Max allowed by Kaggle API
+MAX_PAGES = 20  # Fetch up to 20 pages per sorting order to get all notebooks
 
 def is_valid_kernel_ref(ref):
     """Check if the kernel reference is valid"""
@@ -20,15 +23,50 @@ os.makedirs(DOWNLOAD_PATH, exist_ok=True)
 
 try:
     kernels_csv_path = os.path.join(DOWNLOAD_PATH, "kernels.csv")
-    all_kernels = []
-    page = 1
-    per_page = 100  # Max is 100 per page
+    all_kernels = set()  # Use a set to avoid duplicates
 
-    while True:
-        print(f"Fetching page {page} of notebooks...")
+    for sort_by in SORT_ORDERS:
+        for page in range(1, MAX_PAGES + 1):
+            print(f"Fetching page {page} (sorted by {sort_by})...")
+
+            result = subprocess.run(
+                ["kaggle", "kernels", "list", "--dataset", DATASET, "--csv", "--page-size", str(PER_PAGE), "--page", str(page), "--sort-by", sort_by],
+                capture_output=True,
+                text=False  # Binary mode to prevent encoding issues
+            )
+
+            output = result.stdout.decode("utf-8", errors="replace").strip()
+
+            if not output or "No kernels found" in output:
+                print(f"No more notebooks found for {sort_by}. Moving to next sorting method.")
+                break
+
+            with open(kernels_csv_path, "a", encoding="utf-8", errors='ignore') as f:
+                f.write(output + "\n")
+
+            rows = output.split("\n")
+            if len(rows) <= 1:
+                break
+
+            reader = csv.reader(rows)
+            next(reader, None)  # Skip header
+            kernels = {row[0] for row in reader if row and is_valid_kernel_ref(row[0])}
+
+            if not kernels:
+                break
+
+            all_kernels.update(kernels)
+
+            # Kaggle API rate limiting safety
+            time.sleep(2)
+
+    # As a backup, also search by keyword to find missed notebooks
+    print("Running additional search for missed notebooks...")
+    for page in range(1, MAX_PAGES + 1):
+        print(f"Fetching page {page} using search term '{DATASET}'...")
 
         result = subprocess.run(
-            ["kaggle", "kernels", "list", "--dataset", DATASET, "--csv", "--page-size", str(per_page), "--page", str(page)],
+            ["kaggle", "kernels", "list", "--search", DATASET, "--csv", "--page-size", str(PER_PAGE), "--page", str(page)],
             capture_output=True,
             text=False
         )
@@ -36,35 +74,25 @@ try:
         output = result.stdout.decode("utf-8", errors="replace").strip()
 
         if not output:
-            print("No more data received.")
             break
 
-        with open(kernels_csv_path, "a", encoding="utf-8", errors="ignore") as f:
-            f.write(output + "\n")
-
         rows = output.split("\n")
-
-        if len(rows) <= 1:  # No new kernels found
+        if len(rows) <= 1:
             break
 
         reader = csv.reader(rows)
         next(reader, None)  # Skip header
-        kernels = [row[0] for row in reader if row and is_valid_kernel_ref(row[0])]
+        kernels = {row[0] for row in reader if row and is_valid_kernel_ref(row[0])}
 
-        if not kernels:
-            break
+        all_kernels.update(kernels)
 
-        all_kernels.extend(kernels)
-        page += 1
+        time.sleep(2)
 
-        # Kaggle API rate limiting safety
-        time.sleep(2)  # Prevent hitting request limits
+    print(f"Total unique notebooks found: {len(all_kernels)}")
 
     if not all_kernels:
         print("No notebooks found for this dataset.")
         exit()
-
-    print(f"Found {len(all_kernels)} notebooks to download.")
 
     # Download each notebook
     for kernel_ref in all_kernels:
