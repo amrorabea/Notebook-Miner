@@ -20,41 +20,35 @@ augmentations = Counter()
 
 def process_code(code):
     # Extract and update libraries
-    libs = [match.group(1) or match.group(2) 
-            for match in LIBRARY_REGEX.finditer(code) 
-            if match.group(1) or match.group(2)]
-    libraries.update(libs)
-    
+    libs = set(match.group(1) or match.group(2) 
+                for match in LIBRARY_REGEX.finditer(code) 
+                if match.group(1) or match.group(2))
+    libraries.update(lib.lower() for lib in libs)
+
     # Extract and update models
-    extracted_models = MODEL_REGEX.findall(code)
-    standardized_models = [standardize_model(m) for m in extracted_models]
-    models.update(standardized_models)
-    
+    extracted_models = set(standardize_model(m) for m in MODEL_REGEX.findall(code))
+    models.update(model.lower() for model in extracted_models)
+
     # Extract and update cleaning techniques
-    cleaning = CLEANING_REGEX.findall(code)
+    cleaning = set(clean.lower() for clean in CLEANING_REGEX.findall(code))
     cleaning_techniques.update(cleaning)
-    
+
     # Extract and update architectures
-    extracted_archs = ARCHITECTURE_REGEX.findall(code)
-    standardized_archs = [standardize_architecture(a) for a in extracted_archs]
-    architectures.update(standardized_archs)
-    
+    extracted_archs = set(standardize_architecture(a) for a in ARCHITECTURE_REGEX.findall(code))
+    architectures.update(arch.lower() for arch in extracted_archs)
+
     # Extract and update optimizers
-    extracted_opts = OPTIMIZER_REGEX.findall(code)
-    standardized_opts = [standardize_optimizer(o) for o in extracted_opts]
-    optimizers.update(standardized_opts)
-    
+    extracted_opts = set(standardize_optimizer(o) for o in OPTIMIZER_REGEX.findall(code))
+    optimizers.update(opt.lower() for opt in extracted_opts)
+
     # Extract and update loss functions
-    extracted_losses = LOSS_FUNCTION_REGEX.findall(code)
-    standardized_losses = [standardize_loss(l) for l in extracted_losses]
-    loss_functions.update(standardized_losses)
-    
+    extracted_losses = set(standardize_loss(l) for l in LOSS_FUNCTION_REGEX.findall(code))
+    loss_functions.update(loss.lower() for loss in extracted_losses)
+
     # Extract and update metrics
-    extracted_metrics = METRIC_REGEX.findall(code)
-    standardized_metrics = [standardize_metric(m) for m in extracted_metrics]
-    metrics.update(standardized_metrics)
-    
+    extracted_metrics = set(standardize_metric(m) for m in METRIC_REGEX.findall(code))
+    metrics.update(metric.lower() for metric in extracted_metrics)
+
     # Extract and update augmentations
-    extracted_augs = AUGMENTATION_REGEX.findall(code)
-    standardized_augs = [standardize_augmentation(a) for a in extracted_augs]
-    augmentations.update(standardized_augs)
+    extracted_augs = set(standardize_augmentation(a) for a in AUGMENTATION_REGEX.findall(code))
+    augmentations.update(aug.lower() for aug in extracted_augs)
