@@ -1,15 +1,17 @@
 from flask import Flask, render_template
 import pandas as pd
 import plotly.express as px
+import os
 
 app = Flask(__name__)
 
-# Load the csv data
-df = pd.read_csv("static/extracted_data.csv")
+# Load the CSV data with an absolute path
+csv_path = os.path.join(app.root_path, "static", "extracted_data.csv")
+df = pd.read_csv(csv_path)
+
 
 @app.route("/")
 def index():
-    
     # Libraries
     libraries_df = df[df["Category"] == "Libraries"].head(20)
     libraries_fig = px.bar(
@@ -22,13 +24,10 @@ def index():
         color_continuous_scale="Viridis",
         height=800
     )
-    
     libraries_fig.update_layout(
-        yaxis={'categoryorder':'total ascending'},
+        yaxis={'categoryorder': 'total ascending'},
         font=dict(size=14),
-        title=dict(
-            font=dict(size=24)
-        ),
+        title=dict(font=dict(size=24)),
         margin=dict(l=200),
         showlegend=False,
         xaxis_title="Number of Occurrences",
@@ -97,6 +96,7 @@ def index():
         color_continuous_scale="Viridis"
     )
 
+    # Convert graphs to HTML
     graphs = {
         'libraries_graph': libraries_fig.to_html(full_html=False),
         'models_graph': models_fig.to_html(full_html=False),
@@ -110,4 +110,5 @@ def index():
     return render_template("index.html", **graphs)
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
